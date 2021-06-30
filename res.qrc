@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/resources">
+        <file>sound/beep.wav</file>
+        <file>image/flash.png</file>
+    </qresource>
+    <qresource prefix="/image"/>
+</RCC>
