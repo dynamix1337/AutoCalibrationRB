@@ -1,16 +1,12 @@
 #ifndef CALTHREAD_H
 #define CALTHREAD_H
 
-#include <chrono>
-#include <iostream>
 #include <QApplication>
-#include <QDebug>
-#include <QLabel>
 #include <QMainWindow>
 #include <QSoundEffect>
-#include <QString>
 #include <QThread>
-#include <QWidget>
+
+#include "guitar_control.h"
 
 #define AUDIO_SAMPLE_SIZE   10
 #define VIDEO_SAMPLE_SIZE   10
