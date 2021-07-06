@@ -35,7 +35,7 @@ color: white;
      <widget class="QLabel" name="label">
       <property name="font">
        <font>
-        <pointsize>30</pointsize>
+        <pointsize>25</pointsize>
        </font>
       </property>
       <property name="styleSheet">
