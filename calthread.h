@@ -29,6 +29,7 @@ signals:
     void FlashWhite();
     void ReturnBlack();
     void DisplayText(QString);
+    void progressBar_valueChanged(int);
 
 private:
     QSoundEffect* my_chirpSound;

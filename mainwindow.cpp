@@ -11,6 +11,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(worker, &CalThread::FlashWhite, this, &MainWindow::FlashWhite, Qt::BlockingQueuedConnection);
     connect(worker, &CalThread::ReturnBlack, this, &MainWindow::ReturnBlack, Qt::BlockingQueuedConnection);
     connect(worker, SIGNAL(DisplayText(QString)), this, SLOT(DisplayText(QString)), Qt::BlockingQueuedConnection);
+    connect(worker, SIGNAL(progressBar_valueChanged(int)), this, SLOT(on_progressBar_valueChanged(int)), Qt::BlockingQueuedConnection);
     worker->start();
 }
 
@@ -37,3 +38,9 @@ void MainWindow::DisplayText(QString text)
 {
     ui->label->setText(text);
 }
+
+void MainWindow::on_progressBar_valueChanged(int value)
+{
+    ui->progressBar->setValue(value);
+}
+

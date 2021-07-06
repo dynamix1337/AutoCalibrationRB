@@ -20,6 +20,9 @@ public slots:
     void ReturnBlack();
     void DisplayText(QString text);
 
+private slots:
+    void on_progressBar_valueChanged(int value);
+
 private:
     Ui::MainWindow *ui;
 };

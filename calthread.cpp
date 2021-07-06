@@ -7,7 +7,7 @@ void CalThread::run()
     unsigned char databuf[HID_REPORT_SIZE];
     struct libusb_device_handle *handle;
     struct libusb_config_descriptor *conf_desc;
-    int flag = 0;
+    int flag = 0, progress_value = 0;
     double average = 0;
     libusb_device *dev = NULL;
     QString buff = "0";
@@ -57,7 +57,7 @@ void CalThread::run()
 
         // AUDIO CALIBRATION STARTS HERE
 
-        emit DisplayText("-=- WELCOME TO AUTO-CALIBRATION PoC -=-\n\n\nAudio calibration: \nHold your Guitar Controller up to your sound system's speaker, then press A.");
+        emit DisplayText("-=- WELCOME TO AUTO-CALIBRATION PoC -=-\n\n\nAudio calibration: \nHold your Guitar Controller up to your sound system's speaker, then press A to begin.");
 
         do {
             libusb_interrupt_transfer(handle, 0x81, databuf, HID_REPORT_SIZE, NULL, URB_TIMEOUT);
@@ -89,6 +89,8 @@ void CalThread::run()
                     flag = 1;
                 usleep(8000);
             } while (!flag);
+            progress_value += 10;
+            emit progressBar_valueChanged(progress_value);
             flag = 0;
             databuf[15] = 0x00; // Reset the byte
 
@@ -104,7 +106,7 @@ void CalThread::run()
 
         buff = QString::number(average);
         buff.prepend("Audio Latency is : ");
-        buff.append(" ms. \n\nPress Button A to continue.");
+        buff.append(" ms. \n\nPress Button A to continue to video calibration.");
 
         emit DisplayText(buff) ;
 
@@ -132,8 +134,9 @@ void CalThread::run()
         flag = 0;
 
         // End of Audio Calibration. Start of Video Calibration.
-
-        emit DisplayText("Video calibration: \nHold your Guitar Controller up close to the monitor, \nwith the front of the controller facing the screen, then press A.\n") ;
+        progress_value = 0;
+        emit progressBar_valueChanged(progress_value);
+        emit DisplayText("Video calibration: \nHold your Guitar Controller up close to the monitor, \nwith the front of the controller facing the screen, then press A to begin.\n") ;
 
         do {
             libusb_interrupt_transfer(handle, 0x81, databuf, HID_REPORT_SIZE, NULL, URB_TIMEOUT);
@@ -168,6 +171,8 @@ void CalThread::run()
                 usleep(8000);
             } while (!flag);
             auto t_end = std::chrono::high_resolution_clock::now();
+            progress_value += 10;
+            emit progressBar_valueChanged(progress_value);
             emit ReturnBlack();
             flag = 0;
             databuf[16] = 0x00;
