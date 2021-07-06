@@ -24,41 +24,56 @@ color: white;
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="1" column="0">
+    <item row="2" column="2">
      <widget class="QPushButton" name="pushButton">
       <property name="text">
-       <string>RED</string>
+       <string>Quit</string>
       </property>
      </widget>
     </item>
-    <item row="0" column="0" colspan="2">
+    <item row="1" column="0" colspan="3">
      <widget class="QLabel" name="label">
+      <property name="styleSheet">
+       <string notr="true">label rgb(255, 255, 255)</string>
+      </property>
       <property name="text">
-       <string>TextLabel</string>
+       <string>This will be used for Video Calibration.</string>
       </property>
      </widget>
     </item>
-    <item row="1" column="1">
-     <widget class="QPushButton" name="pushButton_2">
-      <property name="text">
-       <string>BLACK</string>
+    <item row="2" column="1">
+     <spacer name="horizontalSpacer">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
       </property>
-     </widget>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>40</width>
+        <height>20</height>
+       </size>
+      </property>
+     </spacer>
     </item>
    </layout>
   </widget>
-  <widget class="QMenuBar" name="menubar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>800</width>
-     <height>22</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QStatusBar" name="statusbar"/>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>pushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>589</x>
+     <y>578</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>320</x>
+     <y>583</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>
