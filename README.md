@@ -1,5 +1,5 @@
 # AutoCalibrationRB
-PoC of auto calibration process for RB guitar controllers for future implementation
+Proof of concept (PoC) of auto calibration process for RB guitar controllers for future implementation
 
 **Steps to compile :**
 1) sudo apt install qt5-qmake qtmultimedia5-dev qt5-default
