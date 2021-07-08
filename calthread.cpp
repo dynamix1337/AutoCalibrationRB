@@ -8,7 +8,7 @@ void CalThread::run()
     struct libusb_device_handle *handle;
     struct libusb_config_descriptor *conf_desc;
     int flag = 0, progress_value = 0;
-    double average = 0;
+    double audio_lat = 0, video_lat = 0;
     libusb_device *dev = NULL;
     QString buff = "0";
 
@@ -57,7 +57,7 @@ void CalThread::run()
 
         // AUDIO CALIBRATION STARTS HERE
 
-        emit DisplayText("-=- WELCOME TO AUTO-CALIBRATION PoC -=-\n\n\nAudio calibration: \nHold your Guitar Controller up to your sound system's speaker, then press A to begin.");
+        emit DisplayText("Audio calibration: <br>Hold your Guitar Controller up to your sound system's speaker, then press <b><font color=green>A<\font></b> to begin.");
 
         do {
             libusb_interrupt_transfer(handle, 0x81, databuf, HID_REPORT_SIZE, NULL, URB_TIMEOUT);
@@ -67,7 +67,7 @@ void CalThread::run()
         } while (!flag);
         flag = 0;
 
-        emit DisplayText("PERFORMING AUDIO CALIBRATION...\n");
+        emit DisplayText("PERFORMING AUDIO CALIBRATION...");
 
         result = mic_on(handle);
         if (result < 0) {
@@ -80,8 +80,6 @@ void CalThread::run()
             auto t_start = std::chrono::high_resolution_clock::now();
 
             PlaySoundEffect();
-            printf("Chirp %d of %d\n", i+1, AUDIO_SAMPLE_SIZE);
-            fflush(stdout);
 
             do {
                 libusb_interrupt_transfer(handle, 0x81, databuf, HID_REPORT_SIZE, NULL, URB_TIMEOUT);
@@ -89,6 +87,7 @@ void CalThread::run()
                     flag = 1;
                 usleep(8000);
             } while (!flag);
+            auto t_end = std::chrono::high_resolution_clock::now();
             progress_value += 10;
             emit progressBar_valueChanged(progress_value);
             flag = 0;
@@ -96,17 +95,23 @@ void CalThread::run()
 
             /* A method of checking data would be good to add. */
 
-            auto t_end = std::chrono::high_resolution_clock::now();
-
             audio_elapsed_time_ms[i] = std::chrono::duration<double, std::milli>(t_end-t_start).count();
-            average += audio_elapsed_time_ms[i];
+            /* // For Debug
+            printf("%f\n",audio_elapsed_time_ms[i]);
+            fflush(stdout); */
+            audio_lat += audio_elapsed_time_ms[i];
+            do {
+                libusb_interrupt_transfer(handle, 0x81, databuf, HID_REPORT_SIZE, NULL, URB_TIMEOUT);
+                if (databuf[15] == 0x7F ) // Initial state is 7F
+                    flag = 1;
+                usleep(8000);
+            } while (!flag);
+            flag = 0;
             sleep(1);
         }
-        average = average / AUDIO_SAMPLE_SIZE;
+        audio_lat = audio_lat / AUDIO_SAMPLE_SIZE;
 
-        buff = QString::number(average);
-        buff.prepend("Audio Latency is : ");
-        buff.append(" ms. \n\nPress Button A to continue to video calibration.");
+        buff = "Audio Latency is : " + QString::number(audio_lat)+ " ms. <br><br>Press Button <b><font color=green>A<\font></b> to continue to video calibration.";
 
         emit DisplayText(buff) ;
 
@@ -136,7 +141,7 @@ void CalThread::run()
         // End of Audio Calibration. Start of Video Calibration.
         progress_value = 0;
         emit progressBar_valueChanged(progress_value);
-        emit DisplayText("Video calibration: \nHold your Guitar Controller up close to the monitor, \nwith the front of the controller facing the screen, then press A to begin.\n") ;
+        emit DisplayText("Video calibration: <br>Hold your Guitar Controller up close to the monitor, <br>with the front of the controller facing the screen, then press <b><font color=green>A<\font></b> to begin.") ;
 
         do {
             libusb_interrupt_transfer(handle, 0x81, databuf, HID_REPORT_SIZE, NULL, URB_TIMEOUT);
@@ -145,9 +150,8 @@ void CalThread::run()
             usleep(8000);
         } while (!flag);
         flag = 0;
-        average = 0;
 
-        emit DisplayText("PERFORMING VIDEO CALIBRATION...\n");
+        emit DisplayText("PERFORMING VIDEO CALIBRATION...");
 
         result = light_on(handle);
         if (result < 0) {
@@ -161,12 +165,9 @@ void CalThread::run()
 
             emit FlashWhite();
 
-            printf("Flash %d of %d\n", i + 1, VIDEO_SAMPLE_SIZE);
-            fflush(stdout);
-
             do {
                 libusb_interrupt_transfer(handle, 0x81, databuf, HID_REPORT_SIZE, NULL, URB_TIMEOUT);
-                if (databuf[16] == 0x32 ) //My white screen registers a 0x32
+                if (databuf[16] == 0x32 || databuf[16] == 0x7F) //My white screen registers a 0x32
                     flag = 1;
                 usleep(8000);
             } while (!flag);
@@ -180,20 +181,22 @@ void CalThread::run()
             /* A method of checking data would be good to add. */
 
             video_elapsed_time_ms[i] = std::chrono::duration<double, std::milli>(t_end-t_start).count();
-            average += video_elapsed_time_ms[i];
+            /* //For Debug
+            printf("%f\n",video_elapsed_time_ms[i]);
+            fflush(stdout); */
+            video_lat += video_elapsed_time_ms[i];
             do {
                 libusb_interrupt_transfer(handle, 0x81, databuf, HID_REPORT_SIZE, NULL, URB_TIMEOUT);
-                if (databuf[16] == 0x00 ) // Black screen is 0x00
+                if (databuf[16] == 0x00 || databuf[16] == 0x0A) // Black screen is 0x00 or 0A (depending on screens brightness)
                     flag = 1;
                 usleep(8000);
             } while (!flag);
             flag = 0;
+            usleep(500000);
 
         }
-        average = average / VIDEO_SAMPLE_SIZE;
-        buff = QString::number(average);
-        buff.prepend("Video Latency is : ");
-        buff.append(" ms. \n\nPress Button A to end calibration.");
+        video_lat = video_lat / VIDEO_SAMPLE_SIZE;
+        buff = "Video Latency is: " + QString::number(video_lat) + " ms. <br><br>Press Button <b><font color=green>A<\font></b> to end calibration.";
         emit DisplayText(buff);
 
         do {
@@ -212,11 +215,10 @@ void CalThread::run()
         // END OF CALIBRATION PROCESS. Releasing interface.
 
         for (i = 0; i < nb_ifaces; i++) {
-            printf("Releasing interface...\n");
-            fflush(stdout);
             libusb_release_interface(handle, i);
         }
-        emit DisplayText("Click Quit to close program.");
+        buff = "Audio latency: " + QString::number(audio_lat) + " ms<br>Video latency: " + QString::number(video_lat) + " ms<br><br>Click Quit to close program.";
+        emit DisplayText(buff);
     }
 }
 

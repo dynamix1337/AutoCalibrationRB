@@ -6,6 +6,8 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    ui->label->setTextFormat(Qt::RichText);
+    ui->label->setMargin(50);
     CalThread* worker = new CalThread();
     connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()));
     connect(worker, &CalThread::FlashWhite, this, &MainWindow::FlashWhite, Qt::BlockingQueuedConnection);
