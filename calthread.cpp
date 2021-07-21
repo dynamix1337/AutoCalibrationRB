@@ -225,7 +225,7 @@ void CalThread::run()
 CalThread::CalThread()
 {
     my_chirpSound = new QSoundEffect;
-    my_chirpSound->setSource(QUrl::fromLocalFile(":/resources/sound/beep.wav"));
+    my_chirpSound->setSource(QUrl("file:sound/beep.wav"));
 }
 
 CalThread::~CalThread()
