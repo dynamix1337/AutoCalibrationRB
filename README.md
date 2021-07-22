@@ -10,7 +10,7 @@ This code was created for the Mad Catz Fender Mustang Pro-Guitar for Nintendo Wi
 4) make
 5) ./Auto_calibration
 
-**About this Project :**
+**About this Project :**  
 The main objective of this project is to understand the auto-calibration process for Rock Band guitar controllers with the goal of 
 implementing the feature into other applications and enabling custom-guitar makers to create hardware that supports auto-calibration. A fully detailed 
 report of the project can be found in the report folder of this repository.
